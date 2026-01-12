@@ -14,21 +14,21 @@ The texts of news articles are revised, rewritten or sometimes even completely g
 ## Project structure / Experimental Setup 
 
 #### Data scraping and Prepocessing
-- get_tageschau_links.ipynb -> Creates a list of links to all ["Tagesschau"](https://www.tagesschau.de) articles of the past 2 years and saves the articles as JSON.
-- tageschau_paster.ipynb -> Parses the JSON files and extracts the important parts of the articles.
+- 1_get_tagesschau_links.ipynb -> Creates a list of links to all ["Tagesschau"](https://www.tagesschau.de) articles of the past 2 years and saves the articles as JSON.
+- 2_tagesschau_paster.ipynb -> Parses the JSON files and extracts the important parts of the articles.
 #### Generating LLM Text
-- bullets.py -> Uses the LLM to summarize the text of the news articles in a list of bullet points.
-- bullets_to_text.py -> Uses the LLM to write news articles based on the bullet points.
+- 3_bullets.py -> Uses the LLM to summarize the text of the news articles in a list of bullet points.
+- 4_bullets_to_text.py -> Uses the LLM to write news articles based on the bullet points.
 #### Information Retrieval and Evaluation
-- information_retrival_pipeline.py -> Retrieves top 5 articles with BM25 and bi- and cross-encoder pipeline.
-- run information_retrteval_pipeline.ipynb -> Evaluates results and plots data.
+- 5_information_retrieval_pipeline.py -> Retrieves top 5 articles with BM25 and bi- and cross-encoder pipeline.
+- 6_run_information_retrieval_pipeline.ipynb -> Evaluates results and plots data.
 
 ## Reproduction of Results
 
 In the "requirements.txt" file you can see a list of all dependencies needed to run the code.
-To reproduce our results, you first need to scrape the ["Tagesschau"](https://www.tagesschau.de) website using the "get_tageschau_links.ipynb" file to get the data. Then you can parse the resulting data into a pandas dataframe using the "tageschau_paster.ipynb" file.  
-After that, you can generate LLM summaries with the "bullets.py" file. Here you have to provide an API key for Hugging Face and also need to have a computer capable of running an LLM. Those summaries can then be converted into text again by the "bullets_to_text.py" file. For that, you also need the API key and a computer with the necessary power.   
-For the mixed human-written and AI-generated text corpus, you can then use the "information_retrteval_pipeline.ipynb" file to run the BM25 and bi- and cross-encoder pipeline to retrieve the articles from the news article corpus by querying with the tags of an article.
+To reproduce our results, you first need to scrape the ["Tagesschau"](https://www.tagesschau.de) website using the "1_get_tagesschau_links.ipynb" file to get the data. Then you can parse the resulting data into a pandas dataframe using the "2_tagesschau_paster.ipynb" file.  
+After that, you can generate LLM summaries with the "3_bullets.py" file. Here you have to provide an API key for Hugging Face and also need to have a computer capable of running an LLM. Those summaries can then be converted into text again by the "4_bullets_to_text.py" file. For that, you also need the API key and a computer with the necessary power.   
+For the mixed human-written and AI-generated text corpus, you can then use the "5_information_retrieval_pipeline.ipynb" file to run the BM25 and bi- and cross-encoder pipeline to retrieve the articles from the news article corpus by querying with the tags of an article. Finally, you can run the "6_run_information_retrieval_pipeline.ipynb" file see the evaluation and the visualizations of the results.
 
 ## Dataset Description
 We scraped news articles from the ["Tagesschau"](https://www.tagesschau.de) published on their website over the last 2 years, from 11/07/2023 to 11/07/2025 and got 7.191 human-written news articles. We cleaned this dataset by removing the HTML tags, and for computational reasons, we filtered out all articles with more than 1200 tokens. This left us with 4.938 articles. Next, these articles were summarized by an LLM into bullet points and then, AI-generated news articles were generated from these bullet points by another LLM.
