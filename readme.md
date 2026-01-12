@@ -14,14 +14,14 @@ The texts of news articles are revised, rewritten or sometimes even completely g
 ## Project structure / Experimental Setup 
 
 #### Data scraping and Prepocessing
-- get_tageschau_links.ipynb -> creates a list of links to all Tageschau articles of the past 2 years and saves the articles as JSON.
-- tageschau_paster.ipynb -> parses the JSON files and extracts the important parts of the articles.
+- get_tageschau_links.ipynb -> Creates a list of links to all ["Tagesschau"](https://www.tagesschau.de) articles of the past 2 years and saves the articles as JSON.
+- tageschau_paster.ipynb -> Parses the JSON files and extracts the important parts of the articles.
 #### Generating LLM Text
-- bullets.py -> uses LLM to summarize the article text in a list of bullet points
-- bullets_to_text.py -> uses LLM to write a news article based on the bullet points
+- bullets.py -> Uses the LLM to summarize the text of the news articles in a list of bullet points.
+- bullets_to_text.py -> Uses the LLM to write news articles based on the bullet points.
 #### Information Retrieval and Evaluation
-- information_retrival_pipeline.py -> retrieves top k articles with BM25 and bi-encoder
-- run information_retrteval_pipeline.ipynb -> evaluates results and plots data.
+- information_retrival_pipeline.py -> Retrieves top 5 articles with BM25 and bi- and cross-encoder pipeline.
+- run information_retrteval_pipeline.ipynb -> Evaluates results and plots data.
 
 ## Reproduction of Results
 
