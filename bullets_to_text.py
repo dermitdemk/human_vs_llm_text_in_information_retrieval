@@ -32,8 +32,19 @@ ARTICLE_PROMPT = (
     "Bullets:\n{bullets}\n"
 )
 
-# -------------- HF chat template --------------
+# -------------- Hugging Face chat template --------------
 def build_chat(tokenizer, system: str, user: str) -> str:
+    """
+    Construct a chat prompt for a Hugging Face LLM using a system prompt and user input.
+
+    Args:
+    - tokenizer: A tokenizer object
+    - system (str): The system prompt
+    - user (str): The user input
+
+    Returns:
+    - str: A formatted chat prompt string ready for model input
+    """
     messages = [
         {"role": "system", "content": system},
         {"role": "user", "content": user},
@@ -41,6 +52,15 @@ def build_chat(tokenizer, system: str, user: str) -> str:
     return tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
 def clean_bullets(text: str) -> str:
+    """
+    Extract bullet points from the given text.
+
+    Args:
+    - text (str): The input text
+
+    Returns:
+    - str: A string containing lines that start with a bullet marker
+    """
     lines = [ln.strip() for ln in (text or "").splitlines() if ln.strip()]
     bullet_lines = [ln for ln in lines if ln.startswith(("-", "*", "•"))]
     return "\n".join(bullet_lines) if bullet_lines else "\n".join(lines)
@@ -53,6 +73,21 @@ def generate_one_pass(
     temperature: float = 0.2,
     top_p: float = 0.9,
 ) -> str:
+    """
+    Generate text in one pass with a Hugging Face LLM.
+
+    Args:
+    - model: A Hugging Face model
+    - tokenizer: Corresponding tokenizer for the model
+    - prompt (str): Input prompt
+    - min_new_tokens (int): Minimum number of new tokens to generate
+    - max_new_tokens (int): Maximum number of new tokens to generate
+    - temperature (float): Sampling temperature (default is 0.2)
+    - top_p (float): Probability threshold for token selection (default is 0.9)
+
+    Returns:
+    - str: The generated text with the original prompt removed
+    """
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
     input_len = inputs["input_ids"].shape[1]
 
@@ -80,6 +115,19 @@ def generate_one_pass(
     return tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
 
 def main():
+    """
+    Generate news articles from the bullet-point summaries in a CSV using a Hugging Face LLM.
+
+    Process:
+        1. Load the tokenizer and the model 
+        2. Read the input CSV specified by INPUT_CSV
+        3. For each row clean the bullets, build a chat prompt, generate text and add the 
+           generated text to the new column "llm_text" in the output CSV
+        4. Write results in OUTPUT_CSV
+
+    Returns:
+    - None.
+    """
     tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, token=HF_TOKEN, use_fast=True)
 
     #for rtx 3070
@@ -148,3 +196,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

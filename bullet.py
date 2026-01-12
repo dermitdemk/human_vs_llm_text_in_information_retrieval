@@ -34,6 +34,16 @@ BULLET_PROMPT = (
 # -------------- Sentence splitting --------------
 _SENT_SPLIT = re.compile(r"(?<=[.!?])\s+")
 def split_sentences(text: str) -> List[str]:
+    """
+    Split the text into sentences using punctuation as delimiters.
+
+    Args:
+    - text (str): The input text to split
+
+    Returns:
+    - List[str]: A list of sentences with leading or trailing whitespaces removed;
+                 or an empty list if input is None/empty
+    """
     text = (text or "").strip()
     if not text:
         return []
@@ -43,6 +53,15 @@ def split_sentences(text: str) -> List[str]:
 
 # -------------- Chunk count rules --------------
 def choose_n_parts(n_tokens: int) -> int:
+    """
+    Decide into how many parts a text should be split based on the token count.
+
+    Args:
+    - n_tokens (int): Number of tokens in the text
+
+    Returns:
+    - int: Number of parts the text is splitted into (necessary for LLM processing later)
+    """
     if n_tokens <= 1200:
         return 1
     if n_tokens <= 1500:
@@ -59,6 +78,22 @@ def chunk_by_sentences_equal_tokens(
     tokenizer,
     n_parts: int
 ) -> List[str]:
+    """
+    Split the list of sentences into approximately equal-sized chunks based on the token count.
+
+    Args:
+    - sentences (List[str]): List of sentences, which are splitted into chunks
+    - tokenizer: A tokenizer to count tokens
+    - n_parts (int): Desired number of chunks to split the list of sentences into
+
+    Returns:
+    - List[str]: A list of strings, each representing a chunk of concatenated sentences at most "n_parts"
+
+    Notes:
+    - Sentence order is preserved
+    - Ensures at least one sentence per chunk
+    - Dynamically adjusts target chunk size to avoid tiny last chunks
+    """
     if n_parts <= 1 or not sentences:
         return [" ".join(sentences).strip()] if sentences else [""]
 
@@ -96,22 +131,48 @@ def chunk_by_sentences_equal_tokens(
     if cur:
         chunks.append(" ".join(cur).strip())
 
-    # If we ended up with fewer chunks than requested (rare), just return what we have.
-    # If we ended up with more (also rare), merge extras.
+    # If we ended up with fewer chunks than requested (rare), just return what we have
+    # If we ended up with more (also rare), merge extras
     while len(chunks) > n_parts:
         chunks[-2] = (chunks[-2] + " " + chunks[-1]).strip()
         chunks.pop()
 
     return chunks
 
-# -------------- HF chat template --------------
+# -------------- Hugging Face chat template --------------
 def build_chat(tokenizer, system: str, user: str) -> str:
+    """
+    Construct a chat prompt for a Hugging Face LLM using a system and user input.
+
+    Args:
+    - tokenizer: A tokenizer object
+    - system (str): The system prompt
+    - user (str): The user input
+
+    Returns:
+    - str: A formatted chat prompt string ready for model input, with generation
+           prompt appended, if required by the tokenizer
+    """
     messages = [{"role": "system", "content": system},
                 {"role": "user", "content": user}]
     return tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
 @torch.no_grad()
 def generate(model, tokenizer, prompt: str, max_new_tokens=500, temperature=0.2, top_p=0.9) -> str:
+    """
+    Generate text from a Hugging Face LLM given a prompt.
+
+    Args:
+    - model: A Hugging Face model 
+    - tokenizer: The tokenizer 
+    - prompt (str): The input prompt to generate text
+    - max_new_tokens (int): Maximum number of tokens to generate (default is 500)
+    - temperature (float): Sampling temperature (default is 0.2)
+    - top_p (float): Probability threshold for token selection (default is 0.9)
+
+    Returns:
+    - str: The generated text, with the original prompt prefix removed
+    """
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
     out = model.generate(
         **inputs,
@@ -130,12 +191,34 @@ def generate(model, tokenizer, prompt: str, max_new_tokens=500, temperature=0.2,
     return decoded.strip()
 
 def clean_bullets(text: str) -> str:
+    """
+    Extract bullet points from the given text.
+
+    Args:
+    - text (str): The input text
+
+    Returns:
+    - str: A string containing lines that start with a bullet marker
+    """
     # keep only bullet-ish lines; fallback to raw if nothing matches
     lines = [ln.strip() for ln in (text or "").splitlines() if ln.strip()]
     bullet_lines = [ln for ln in lines if ln.startswith(("-", "*", "•"))]
     return "\n".join(bullet_lines) if bullet_lines else "\n".join(lines)
 
 def main():
+    """
+    Generate bullet-point summaries for news articles in a CSV using a Hugging Face LLM.
+
+    Process:
+        1. Load tokenizer and model from Hugging Face
+        2. Read input CSV specified by INPUT_CSV.
+        3. For each row, extract "content" and generate bullet points
+        4. Clean the generated bullets
+        5. Write results to OUTPUT_CSV, adding a "bullets" column if not present
+        
+    Returns:
+    - None. 
+    """
     tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, token=HF_TOKEN, use_fast=True)
 
     #config for rtx 3070
@@ -163,7 +246,7 @@ def main():
         else:
             out_fields = fieldnames
 
-        # write output csv (laufend)
+        # write output csv (ongoing)
         with open(OUTPUT_CSV, "w", encoding="utf-8", newline="") as f_out:
             writer = csv.DictWriter(f_out, fieldnames=out_fields)
             writer.writeheader()
@@ -191,9 +274,9 @@ def main():
                 chat = build_chat(tokenizer, SYSTEM, user)
                 out = generate(model, tokenizer, chat, max_new_tokens=500, temperature=0.2, top_p=0.9)
 
-                #We fell back to only use artciles with maximum token of 1200, 
+                #We fell back to only use articles with maximum token of 1200, 
                 #so chunking was not used in the final analysis
-                row["bullets"] = clean_bullets(out)#"\n".join([b for b in clean_bullets(out) if b.strip()]).strip()
+                row["bullets"] = clean_bullets(out) #"\n".join([b for b in clean_bullets(out) if b.strip()]).strip()
                 writer.writerow(row)
 
                 if row_i % 10 == 0:
@@ -204,3 +287,5 @@ def main():
 if __name__ == "__main__":
 
     main()
+
+
