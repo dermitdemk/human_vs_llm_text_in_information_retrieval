@@ -26,3 +26,8 @@ The texts of news articles are revised, rewritten or sometimes even completely g
 ## Dataset Descripiton
 We scraped all Tageschau articles published on their website over the last 2 years, from 11/07/2023 to 11/07/2025 and got 7.191 articles. We cleaned this data by removing the HTML tags, and for computational reasons, we filtered out all articles with more than 1200 tokens. This left us with 4.938 articles. These articles then were summarized by an LLM into bullet points and then written into an article again by another LLM.
 
+## Reproduction of Results
+
+To reproduce these results, you need to scrape the Tagesschau website using the get_tageschau_links.ipynb file. Then you can parse the resulting data into a pandas dataframe using the tageschau_paster.ipynb.  
+After that, you can generate LLM summaries with the bullets.py. Here you have to provide an API key for Hugging Face and also need to have a computer capable of running an LLM. Those summaries can then be converted into text again by bullets_to_text.py, for that, you also need the API key and a good computer.  
+With the Humen and LLM text, you can use the information_retrteval_pipeline.ipynb to run a BM25 and bi and cross-encoder pipeline to retrieve articles from your corpus by querying with the tags of an article.
