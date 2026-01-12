@@ -16,10 +16,12 @@ The texts of news articles are revised, rewritten or sometimes even completely g
 #### Data scraping and Prepocessing
 - get_tagesschau_links.ipynb -> Creates a list of links to all ["Tagesschau"](https://www.tagesschau.de) articles of the past 2 years and saves the articles as JSON.
 - tagesschau_paster.ipynb -> Parses the JSON files and extracts the important parts of the articles.
+- clean_articles.py -> extracts subtitle from text, cleans html chunk, produces clean useable csv from scraped json data
 #### Generating LLM Text
 - bullets.py -> Uses the LLM to summarize the text of the news articles in a list of bullet points.
 - bullets_to_text.py -> Uses the LLM to write news articles based on the bullet points.
 #### Information Retrieval and Evaluation
+- evaluate_per_tag.py -> Computes evaluation metrics and plots data per tag
 - information_retrieval_pipeline.py -> Retrieves top 5 articles with BM25 and bi- and cross-encoder pipeline.
 - run_information_retrieval_pipeline.ipynb -> Evaluates results and plots data.
 
