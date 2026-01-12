@@ -78,8 +78,6 @@ def chunk_by_sentences_equal_tokens(
     tokenizer,
     n_parts: int
 ) -> List[str]:
-    if n_parts <= 1 or not sentences:
-        return [" ".join(sentences).strip()] if sentences else [""]
     """
     Split the list of sentences into approximately equal-sized chunks based on the token count.
 
@@ -96,6 +94,8 @@ def chunk_by_sentences_equal_tokens(
     - Ensures at least one sentence per chunk
     - Dynamically adjusts target chunk size to avoid tiny last chunks
     """
+    if n_parts <= 1 or not sentences:
+        return [" ".join(sentences).strip()] if sentences else [""]
 
     sent_tokens = [len(tokenizer.encode(s, add_special_tokens=False)) for s in sentences]
     total = sum(sent_tokens)
@@ -287,4 +287,5 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
