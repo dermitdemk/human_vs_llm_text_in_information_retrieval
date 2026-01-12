@@ -16,6 +16,7 @@ _SPACE_BEFORE_PUNCT_RE = re.compile(r"\s+([.,;:!?])")
 # "Über dieses Thema berichtete Inforadio am 02. Juli 2025 um 07:24 Uhr."
 # "Mit Informationen von ... "
 # "Stand: ... "
+
 _META_LINE_RE = re.compile(
     r"^(?:"
     r"Über\s+dieses\s+Thema\s+berichtete.*"
@@ -42,6 +43,15 @@ _TRAILING_META_RE = re.compile(
 
 
 def _normalize_text(s: str) -> str:
+    """
+    Normalizes a text string by standardizing whitespace and punctuation spacing.
+
+    Args: 
+    - s (str): The input text string to be normalized
+
+    Returns: 
+    - str: Standardized text string 
+    """
     s = s.replace("\r\n", "\n").replace("\r", "\n")
     s = _WHITESPACE_RE.sub(" ", s).strip()
     s = _SPACE_BEFORE_PUNCT_RE.sub(r"\1", s)
@@ -50,7 +60,7 @@ def _normalize_text(s: str) -> str:
 
 def extract_subtitle_and_clean_html(html: str) -> Tuple[str, str]:
     """
-    Returns (subtitle, cleaned_text_content).
+    Returns (subtitle, cleaned_text_content)
 
     Rules:
     - If the FIRST non-whitespace top-level element is a <strong>, extract its text as subtitle,
@@ -112,7 +122,7 @@ def extract_subtitle_and_clean_html(html: str) -> Tuple[str, str]:
         em.unwrap()
 
     # 3) Remove remaining <strong> that are meta (usually end-of-article hints)
-    #    IMPORTANT: we already removed the first <strong> if it was subtitle.
+    #    IMPORTANT: we already removed the first <strong> if it was subtitle
     for st in container.find_all("strong"):
         st_text = _normalize_text(st.get_text(" ", strip=True))
         if st_text and _META_LINE_RE.match(st_text):
@@ -139,6 +149,16 @@ def extract_subtitle_and_clean_html(html: str) -> Tuple[str, str]:
 
 
 def print_contents_per_label(df: pd.DataFrame, max_rows: int = 3) -> None:
+    """
+    Prints an overview of the dataframe columns
+
+    Args:
+    - df (pd.DataFrame): The dataframe 
+    - max_rows (int): Maximum number of non-null example values printed per column, default is 3.
+
+    Returns:
+    - None.
+    """
     print("\n=== CSV: per-label overview ===")
     for col in df.columns:
         non_null = df[col].notna().sum()
@@ -152,6 +172,18 @@ def print_contents_per_label(df: pd.DataFrame, max_rows: int = 3) -> None:
 
 
 def main() -> None:
+    """
+    Clean HTML from the news CSV, extract subtitles, and export a cleaned CSV.
+
+    Args:
+    - input_csv (str): Path to input CSV file
+    - "-o", "--output_csv" (str): Path to output CSV (Default is "cleaned_export.csv")
+    - "--no-print" (bool): If set, do not print contents per label
+    - "--max-print-rows" (int): Number of example rows to print per label (Default is 3)
+
+    Output:
+    - Cleaned CSV file with the columns: 'index', 'title', 'subtitle', 'content', 'tags'
+    """
     parser = argparse.ArgumentParser(
         description="Clean HTML from news CSV, extract subtitle from leading <strong>, drop meta strong lines, export reduced CSV."
     )
@@ -206,3 +238,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
