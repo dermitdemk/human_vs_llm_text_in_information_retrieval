@@ -7,6 +7,9 @@ import faiss
 import numpy as np
 from tqdm import tqdm
 
+BIENCODER_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+CROSS_ENCODER_NAME = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+
 def bm25_implement(query:list[str],n:int,bm25,df)->pd.DataFrame:
     """
     Makes a query and returns the number of correct matches in the top k
@@ -105,7 +108,8 @@ def bi_encoder(modus:Literal['content','summary','content_and_summary','llm_text
     if modus == 'llm_text':
         courpus = df['llm_text']
     #test = 'test'
-    reranker = CrossEncoder('cross-encoder/mmarco-mMiniLMv2-L12-H384-v1',device='cpu')
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    reranker = CrossEncoder(CROSS_ENCODER_NAME,device=device)
     
     embeddings, model = creat_document_embeddings(corpus=courpus)
     querry_results = []
@@ -138,9 +142,9 @@ def creat_document_embeddings(corpus):
     Returns:
     - tuple: faiss Index and SentenceTransformer
     """
-    model = SentenceTransformer('intfloat/multilingual-e5-small',device='cpu')
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    model.to('cpu')
+    device = "cuda" if torch.cuda.is_available() else ""
+    model = SentenceTransformer(BIENCODER_NAME,device=device)
+    model.to(device)
     courpus_embeddings = model.encode(corpus)
     embedding_dimension = courpus_embeddings.shape[1]
     index = faiss.IndexFlatL2(embedding_dimension)
@@ -158,8 +162,8 @@ def get_k_kanidates(querry_embedding,k,embeddings):
         return index
 def rerank_the_articles (selected_articles,n,querry,reranker):
     ## cross encodes the selected articles and ranks them
-    
-    reranker.to('cpu')
+    device = "cuda" if torch.cuda.is_available() else ""
+    reranker.to(device)
     pairs =[[querry,doc]for doc in selected_articles['content']]
     scores = reranker.predict(pairs)
     selected_articles['scores'] = scores
