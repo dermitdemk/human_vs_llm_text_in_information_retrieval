@@ -4,7 +4,7 @@
 
 |                       |                    |                              |
 | :-------------------: | :----------------: | :--------------------------: |
-|     **Erik Koppenhagen**    | **Simon Fessl** |     **Jasmin bauer**     |
+|     **Erik Koppenhagen**    | **Simon Fessl** |     **Jasmin Bauer**     |
 | Data Scraping and preprocessing |      LLM text generation     | Visualization and Reporting |
 
 In the recent years, the use of large language models (LLMs) has led to a rapid increase of AI-
