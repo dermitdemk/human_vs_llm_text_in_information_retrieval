@@ -22,3 +22,7 @@ The texts of news articles are revised, rewritten or sometimes even completely g
 #### Information retrieval and evaluation
 - information_retrival_pipeline.py -> retrieves top k articles with BM25 and bi-encoder
 - run information_retrteval_pipeline.ipynb -> evaluates results and plots data.
+
+## Dataset Descripiton
+We scraped all Tageschau articles published on their website over the last 2 years, from 11/07/2023 to 11/07/2025 and got 7.191 articles. We cleaned this data by removing the HTML tags, and for computational reasons, we filtered out all articles with more than 1200 tokens. This left us with 4.938 articles. These articles then were summarized by an LLM into bullet points and then written into an article again by another LLM.
+
