@@ -5,7 +5,7 @@
 |                       |                    |                              |
 | :-------------------: | :----------------: | :--------------------------: |
 |     **Erik Koppenhagen**    | **Simon Fessl** |     **Jasmin Bauer**     |
-| Data Scraping and preprocessing |      LLM text generation     | Visualization and Reporting |
+| Dataset, Preprocessing |      Methods/Models     | Evaluation |
 
 In the recent years, the use of large language models (LLMs) has led to a rapid increase of AI-
 generated content on the internet. Specifically in journalism the use of AI also increased.
